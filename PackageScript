@@ -1,0 +1,69 @@
+# vim: set ts=8 sts=2 sw=2 tw=99 et ft=python:
+import os
+
+# This is where the files will be output to
+# package is the default
+builder.SetBuildFolder('package')
+
+# Add any folders you need to this list
+folder_list = [
+  'addons/sourcemod/extensions',
+  'addons/sourcemod/scripting',
+  'addons/sourcemod/scripting/include',
+  'addons/sourcemod/gamedata',
+  #'addons/sourcemod/configs',
+  'addons/sourcemod/plugins'
+]
+
+# Create the distribution folder hierarchy.
+folder_map = {}
+for folder in folder_list:
+  norm_folder = os.path.normpath(folder)
+  folder_map[folder] = builder.AddFolder(norm_folder)
+
+# Do all straight-up file copies from the source tree.
+def CopyFiles(src, dest, files):
+  if not dest:
+    dest = src
+  dest_entry = folder_map[dest]
+  for source_file in files:
+    source_path = os.path.join(builder.sourcePath, src, source_file)
+    builder.AddCopy(source_path, dest_entry)
+
+# Plugin files 
+CopyFiles('scripting', 'addons/sourcemod/scripting',
+  [
+    'l4d2_unreservelobby.sp',
+    'l4do_test.sp'
+  ]
+)
+
+# Include files 
+CopyFiles('scripting/include', 'addons/sourcemod/scripting/include',
+  [
+    'l4d2director.inc',
+    'l4d2timers.inc',
+    'l4d2weapons.inc',
+    'left4downtown.inc'
+  ]
+)
+
+# GameData files
+CopyFiles('gamedata', 'addons/sourcemod/gamedata',
+  [ 'left4downtown.l4d2.txt' ]
+)
+
+# Config Files
+#CopyFiles('configs', 'addons/sourcemod/configs',
+#  [ 'configfile.cfg',
+#  'otherconfig.cfg,
+#  ]
+#)
+
+# Copy binaries.
+for cxx_task in Extension.extensions:
+  builder.AddCopy(cxx_task.binary, folder_map['addons/sourcemod/extensions'])
+
+for smx_file in Extension.smx_files:
+  smx_entry = Extension.smx_files[smx_file]
+  builder.AddCopy(smx_entry, folder_map['addons/sourcemod/plugins'])

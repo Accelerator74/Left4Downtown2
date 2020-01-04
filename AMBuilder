@@ -1,0 +1,83 @@
+# vim: set sts=2 ts=8 sw=2 tw=99 et ft=python:
+import os, sys
+
+projectName = 'left4downtown'
+
+# smsdk_ext.cpp will be automatically added later
+sourceFiles = [
+  'extension.cpp',
+  'natives.cpp',
+  'vglobals.cpp',
+  'l4d2sdk/l4d2calls.cpp',
+  'util.cpp',
+  'CDetour/detours.cpp',
+  'asm/asm.c',
+  'detours/detour.cpp',
+  'detours/spawn_tank.cpp',
+  'detours/spawn_witch.cpp',
+  'detours/clear_team_scores.cpp',
+  'detours/set_campaign_scores.cpp',
+  'detours/first_survivor_left_safe_area.cpp',
+  'detours/mob_rush_start.cpp',
+  'detours/spawn_it_mob.cpp',
+  'detours/spawn_mob.cpp',
+  'detours/try_offering_tank_bot.cpp',
+  'detours/get_script_value_int.cpp',
+  'detours/get_script_value_float.cpp',
+  'detours/shoved_by_survivor.cpp',
+  'detours/get_crouch_top_speed.cpp',
+  'detours/get_run_top_speed.cpp',
+  'detours/get_walk_top_speed.cpp',
+  'detours/has_configurable_difficulty.cpp',
+  'detours/get_survivor_set.cpp',
+  'detours/fast_get_survivor_set.cpp',
+  'codepatch/patchmanager.cpp',
+  'detours/get_mission_versus_boss_spawning.cpp',
+  'detours/cthrow_activate_ability.cpp',
+  'l4d2sdk/l4d2timers.cpp',
+  'timernatives.cpp',
+  'detours/start_melee_swing.cpp',
+  'weaponnatives.cpp',
+  'meleeweaponnatives.cpp',
+  'directornatives.cpp',
+  'detours/send_in_rescue_vehicle.cpp',
+  'detours/change_finale_stage.cpp',
+  'detours/get_script_value_string.cpp',
+  'detours/end_versus_mode_round.cpp',
+  'detours/select_weighted_sequence.cpp',
+  'detours/spawn_special.cpp',
+  'detours/spawn_witchbride.cpp',
+  'detours/on_revived.cpp',
+  'detours/use_healing_items.cpp',
+  'detours/find_scavenge_item.cpp',
+  'detours/water_move.cpp',
+  'detours/on_stagger.cpp',
+  'detours/terror_weapon_hit.cpp',
+  'detours/get_mission_info.cpp',
+  'detours/shoved_by_pounce_landing.cpp',
+  'detours/replace_tank.cpp',
+  'detours/choose_victim.cpp',
+  'addons_disabler.cpp'
+]
+
+###############
+# Make sure to edit PackageScript, which copies your files to their appropriate locations
+# Simple extensions do not need to modify past this point.
+
+project = Extension.HL2Project(builder, projectName + '.ext')
+
+if os.path.isfile(os.path.join(builder.currentSourcePath, 'sdk', 'smsdk_ext.cpp')):
+  # Use the copy included in the project
+  project.sources += [os.path.join('sdk', 'smsdk_ext.cpp')]
+else:
+  # Use the copy included with SM 1.6 and newer
+  project.sources += [os.path.join(Extension.sm_root, 'public', 'smsdk_ext.cpp')]
+
+project.sources += sourceFiles
+  
+for sdk_name in Extension.sdks:
+  sdk = Extension.sdks[sdk_name]
+  
+  binary = Extension.HL2Config(project, projectName + '.ext.' + sdk.ext, sdk)
+
+Extension.extensions = builder.Add(project)

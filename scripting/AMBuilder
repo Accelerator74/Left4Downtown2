@@ -1,0 +1,36 @@
+# vim: set ts=8 sts=2 sw=2 tw=99 et ft=python: 
+import os
+
+files = [
+  'l4d2_unreservelobby.sp',
+  'l4do_test.sp'
+]
+
+spcomp_argv = [
+  os.path.join(Extension.sm_bin_path, 'addons', 'sourcemod', 'scripting', 'spcomp'),
+  '-i' + os.path.relpath(os.path.join(builder.sourcePath, 'scripting', 'include'),
+                         os.path.join(builder.buildPath, builder.buildFolder)),
+  '-h'
+]
+
+def build_plugin(script_path, smx_file):
+  inputs = [
+    os.path.join(Extension.sm_bin_path, 'addons', 'sourcemod', 'scripting'),
+    script_path,
+  ]
+  outputs = [
+    smx_file
+  ]
+  argv = spcomp_argv + [script_path]
+  cmd_entry, (smx_entry,) = builder.AddCommand(
+    inputs = inputs,
+    argv = argv,
+    outputs = outputs,
+    weak_inputs = Extension.generated_headers or []
+  )
+  Extension.smx_files[smx_file] = smx_entry
+
+for script_file in files:
+  script_path = os.path.join(builder.currentSourcePath, script_file)
+  smx_file = os.path.splitext(script_file)[0] + '.smx'
+  build_plugin(script_path, smx_file)
